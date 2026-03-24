@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { BottomNav } from './components/BottomNav';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'motion/react';
+import { ToastProvider } from './context/ToastContext';
+import { PublicLayout } from './components/PublicLayout';
 import { AdminLayout } from './components/AdminLayout';
 import { Home } from './pages/Home';
 import { SearchPage } from './pages/SearchPage';
@@ -14,16 +16,20 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminWards } from './pages/AdminWards';
 import { AdminFacilities } from './pages/AdminFacilities';
 
-export default function App() {
+function AnimatedRoutes() {
+  const location = useLocation();
+  // Use location.pathname as key on a div wrapper to trigger AnimatePresence transitions
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/facility/:id" element={<FacilityDetail />} />
-          
+    <AnimatePresence mode="wait">
+      <div key={location.pathname}>
+        <Routes location={location}>
+          {/* Public Routes with BottomNav */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/facility/:id" element={<FacilityDetail />} />
+          </Route>
+
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
@@ -32,14 +38,17 @@ export default function App() {
             <Route path="facilities" element={<AdminFacilities />} />
           </Route>
         </Routes>
-        
-        {/* Show BottomNav only on public routes */}
-        <Routes>
-          <Route path="/" element={<BottomNav />} />
-          <Route path="/search" element={<BottomNav />} />
-          <Route path="/facility/:id" element={<BottomNav />} />
-        </Routes>
       </div>
-    </Router>
+    </AnimatePresence>
+  );
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <Router>
+        <AnimatedRoutes />
+      </Router>
+    </ToastProvider>
   );
 }

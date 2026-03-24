@@ -4,7 +4,13 @@
       "Bash(gh auth:*)",
       "Bash(firebase --version)",
       "Bash(firebase login:list)",
-      "Bash(firebase projects:list)"
+      "Bash(firebase projects:list)",
+      "Bash(gh repo:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(npx vite:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
