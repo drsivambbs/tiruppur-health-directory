@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "Ward": {
+      "title": "Ward",
+      "description": "A ward within a zone in Tiruppur Corporation",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the ward"
+        },
+        "zoneId": {
+          "type": "string",
+          "description": "ID of the zone this ward belongs to"
+        },
+        "deleted": {
+          "type": "boolean",
+          "description": "Indicates if the ward is soft-deleted"
+        },
+        "_adminToken": {
+          "type": "string",
+          "description": "Hardcoded admin token for basic security"
+        }
+      },
+      "required": ["name", "zoneId"]
+    },
+    "Facility": {
+      "title": "Facility",
+      "description": "A health facility (UPHC or HWC)",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["UPHC", "HWC"],
+          "description": "Type of facility"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the facility"
+        },
+        "wardId": {
+          "type": "string",
+          "description": "ID of the ward this facility belongs to"
+        },
+        "parentUphcId": {
+          "type": "string",
+          "description": "ID of the parent UPHC (only for HWC)"
+        },
+        "medicalOfficerName": {
+          "type": "string",
+          "description": "Name of the Medical Officer"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address"
+        },
+        "whatsapp": {
+          "type": "string",
+          "description": "WhatsApp number"
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Latitude coordinate"
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude coordinate"
+        },
+        "address": {
+          "type": "string",
+          "description": "Physical address"
+        },
+        "deleted": {
+          "type": "boolean",
+          "description": "Indicates if the facility is soft-deleted"
+        },
+        "_adminToken": {
+          "type": "string",
+          "description": "Hardcoded admin token for basic security"
+        }
+      },
+      "required": ["type", "name", "wardId", "medicalOfficerName", "phone", "email", "whatsapp", "latitude", "longitude"]
+    }
+  },
+  "firestore": {
+    "/wards/{wardId}": {
+      "schema": {
+        "$ref": "#/entities/Ward"
+      },
+      "description": "Collection of wards"
+    },
+    "/facilities/{facilityId}": {
+      "schema": {
+        "$ref": "#/entities/Facility"
+      },
+      "description": "Collection of health facilities"
+    }
+  }
+}

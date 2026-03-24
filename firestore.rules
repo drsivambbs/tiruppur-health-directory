@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: wards
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, < 100 chars)
+    //   - zoneId: string (required, < 50 chars)
+    //   - _adminToken: string (required, must be 'admin123')
+    //
+    // Collection: facilities
+    // Document ID: auto-generated
+    // Fields:
+    //   - type: string (required, 'UPHC' or 'HWC')
+    //   - name: string (required, < 200 chars)
+    //   - wardId: string (required, < 100 chars)
+    //   - parentUphcId: string (optional, < 100 chars)
+    //   - medicalOfficerName: string (required, < 100 chars)
+    //   - phone: string (required, < 20 chars)
+    //   - email: string (required, < 100 chars)
+    //   - whatsapp: string (required, < 20 chars)
+    //   - latitude: number (required)
+    //   - longitude: number (required)
+    //   - address: string (optional, < 500 chars)
+    //   - _adminToken: string (required, must be 'admin123')
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function hasAdminToken(data) {
+      return data._adminToken == 'admin123';
+    }
+
+    function isValidWard(data) {
+      return data.keys().hasAll(['name', 'zoneId', '_adminToken']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.zoneId is string && data.zoneId.size() > 0 && data.zoneId.size() < 50 &&
+             (!('deleted' in data) || data.deleted is bool) &&
+             hasAdminToken(data);
+    }
+
+    function isValidFacility(data) {
+      return data.keys().hasAll(['type', 'name', 'wardId', 'medicalOfficerName', 'phone', 'email', 'whatsapp', 'latitude', 'longitude', '_adminToken']) &&
+             data.type in ['UPHC', 'HWC'] &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.wardId is string && data.wardId.size() > 0 && data.wardId.size() < 100 &&
+             data.medicalOfficerName is string && data.medicalOfficerName.size() > 0 && data.medicalOfficerName.size() < 100 &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() < 20 &&
+             data.email is string && data.email.size() > 0 && data.email.size() < 100 &&
+             data.whatsapp is string && data.whatsapp.size() > 0 && data.whatsapp.size() < 20 &&
+             data.latitude is number &&
+             data.longitude is number &&
+             (!('parentUphcId' in data) || (data.parentUphcId is string && data.parentUphcId.size() < 100)) &&
+             (!('address' in data) || (data.address is string && data.address.size() < 500)) &&
+             (!('deleted' in data) || data.deleted is bool) &&
+             hasAdminToken(data);
+    }
+
+    match /wards/{wardId} {
+      // Public read access as requested for the directory
+      allow read: if true;
+      
+      // Write access requires the hardcoded admin token and valid schema
+      allow create: if isValidWard(request.resource.data);
+      allow update: if isValidWard(request.resource.data) && hasAdminToken(resource.data);
+      allow delete: if false; // Hard deletes disabled, using soft deletes via update
+    }
+
+    match /facilities/{facilityId} {
+      // Public read access as requested for the directory
+      allow read: if true;
+      
+      // Write access requires the hardcoded admin token and valid schema
+      allow create: if isValidFacility(request.resource.data);
+      allow update: if isValidFacility(request.resource.data) && hasAdminToken(resource.data);
+      allow delete: if false; // Hard deletes disabled, using soft deletes via update
+    }
+  }
+}
